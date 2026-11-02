@@ -1,0 +1,39 @@
+services:
+  # -------------------------------------------------------------
+  # Spring Boot Backend Web Service
+  # -------------------------------------------------------------
+  - type: web
+    name: taskpulse-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: TASKPULSE_MAIL_SIMULATION_MODE
+        value: "true"
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: taskpulse-postgres
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: taskpulse-postgres
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: taskpulse-postgres
+          property: password
+
+databases:
+  # -------------------------------------------------------------
+  # Free PostgreSQL Database
+  # -------------------------------------------------------------
+  - name: taskpulse-postgres
+    plan: free
+    region: oregon
+    databaseName: taskpulsedb
+    user: taskpulse_user

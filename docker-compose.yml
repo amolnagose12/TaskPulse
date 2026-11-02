@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------
+  # PostgreSQL Database
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: taskpulse-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: taskpulsedb
+      POSTGRES_USER: taskpulse_user
+      POSTGRES_PASSWORD: taskpulse_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # -------------------------------------------------------------
+  # Spring Boot Backend
+  # -------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: taskpulse-backend
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      PORT: 8080
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taskpulsedb
+      SPRING_DATASOURCE_USERNAME: taskpulse_user
+      SPRING_DATASOURCE_PASSWORD: taskpulse_password
+      TASKPULSE_MAIL_SIMULATION_MODE: "true" # Change to "false" when real SMTP credentials are provided
+      # SPRING_MAIL_HOST: smtp.gmail.com
+      # SPRING_MAIL_USERNAME: your-email@gmail.com
+      # SPRING_MAIL_PASSWORD: your-app-password
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:
+
